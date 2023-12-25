@@ -1,0 +1,15 @@
+[package]
+name = "rusd"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+pest = "2.7.5"
+pest_derive = "2.7.5"
+
+[dev-dependencies]
+criterion = "0.5.1"
+
+[[bench]]
+name = "benchmark"
+harness = false

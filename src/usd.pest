@@ -1,0 +1,277 @@
+// comments
+COMMENT                     = _{ single_line_comment | multi_line_comment }
+single_line_comment_content =  { (!NEWLINE ~ ANY)* }
+single_line_comment         = _{ "//" ~ single_line_comment_content ~ NEWLINE? }
+multi_line_comment_content  =  { (!"*/" ~ ANY)* }
+multi_line_comment          = _{ "/*" ~ multi_line_comment_content ~ "*/" }
+
+// whitespace
+WHITESPACE = _{ " " | ";" | NEWLINE }
+
+// keywords
+add                 = { "add" }
+append              = { "append" }
+class               = { "class" }
+config              = { "config" }
+connect             = { "connect" }
+custom              = { "custom" }
+custom_data         = { "customData" }
+default             = { "default" }
+def                 = { "def" }
+delete              = { "delete" }
+dictionary          = { "dictionary" }
+displayUnit         = { "displayUnit" }
+doc                 = { "doc" }
+inherits            = { "inherits" }
+kind                = { "kind" }
+nameChildren        = { "nameChildren" }
+none                = { "None" }
+offset              = { "offset" }
+over                = { "over" }
+payload             = { "payload" }
+permission          = { "permission" }
+prefixSubstitutions = { "prefixSubstitutions" }
+prepend             = { "prepend" }
+properties          = { "properties" }
+references          = { "references" }
+relocates           = { "relocates" }
+rel                 = { "rel" }
+reorder             = { "reorder" }
+rootPrims           = { "rootPrims" }
+scale               = { "scale" }
+subLayers           = { "subLayers" }
+suffixSubstitutions = { "suffixSubstitutions" }
+specializes         = { "specializes" }
+symmetry_arguments  = { "symmetryArguments" }
+symmetryFunction    = { "symmetryFunction" }
+timeSamples         = { "timeSamples" }
+uniform             = { "uniform" }
+variant_set         = { "variantSet" }
+variant_sets        = { "variantSets" }
+variants            = { "variants" }
+varying             = { "varying" }
+
+keywords = {
+    add
+  | append
+  | class
+  | config
+  | connect
+  | custom
+  | custom_data
+  | default
+  | def
+  | delete
+  | dictionary
+  | displayUnit
+  | doc
+  | inherits
+  | kind
+  | nameChildren
+  | none
+  | offset
+  | over
+  | payload
+  | permission
+  | prefixSubstitutions
+  | prepend
+  | properties
+  | references
+  | relocates
+  | rel
+  | reorder
+  | rootPrims
+  | scale
+  | subLayers
+  | suffixSubstitutions
+  | specializes
+  | symmetry_arguments
+  | symmetryFunction
+  | timeSamples
+  | uniform
+  | variant_set
+  | variant_sets
+  | variants
+  | varying
+}
+
+// identifiers
+namespaced_name          =  { namespace_identifier | identifier }
+namespaced_name_for_test =  { SOI ~ namespaced_name ~ EOI }
+identifier               = @{ (ASCII_ALPHA | "_") ~ (ASCII_ALPHANUMERIC | "_")* }
+identifier_for_test      =  { SOI ~ identifier ~ EOI }
+namespace_identifier     = @{ identifier ~ (":" ~ identifier)+ }
+
+// path or reference
+scene_path       = _{ "<" ~ scene_path_value ~ ">" }
+scene_path_value =  { (!("<" | ">" | NEWLINE) ~ ANY)* }
+
+asset_reference       = _{ "@" ~ asset_reference_value ~ "@" }
+asset_reference_value =  { (!("@" | NEWLINE) ~ ANY)* }
+
+// string
+string                            = _{ triple_quoted_string | single_quoted_string | double_quoted_string }
+single_quoted_string              = _{ "'" ~ single_quoted_string_value ~ "'" }
+single_quoted_string_normal_chars = _{ !("'" | newline_or_escape) ~ ANY }
+single_quoted_string_value        =  { (single_quoted_string_normal_chars | escaped_char)* }
+
+double_quoted_string              = _{ "\"" ~ double_quoted_string_value ~ "\"" }
+double_quoted_string_normal_chars = _{ !("\"" | newline_or_escape) ~ ANY }
+double_quoted_string_value        =  { (double_quoted_string_normal_chars | escaped_char)* }
+
+triple_quoted_string       = _{ PUSH("\"\"\"" | "'''") ~ triple_quoted_string_value ~ POP }
+triple_quoted_string_value =  { (!PEEK ~ ANY)* }
+
+escaped               = _{ "\\" }
+escaped_char          = @{ escaped ~ ANY }
+escaped_char_for_test =  { SOI ~ escaped_char ~ EOI }
+newline_or_escape     = _{ escaped | NEWLINE }
+
+// int
+int          = @{ "-"? ~ (ASCII_NONZERO_DIGIT ~ ASCII_DIGIT+ | ASCII_DIGIT) }
+int_for_test =  { SOI ~ int ~ EOI }
+
+// float
+float           = @{ float_left_part ~ "." ~ ASCII_DIGIT* ~ ("e" ~ int)? }
+float_left_part = @{ "-"? ~ ((ASCII_NONZERO_DIGIT ~ ASCII_DIGIT+) | ASCII_DIGIT) }
+float_for_test  =  { SOI ~ float ~ EOI }
+
+// number
+number = _{ float | int }
+
+// value types
+bool_type     = { "bool" }
+uchar_type    = { "uchar" }
+int_type      = { "int" }
+uint_type     = { "uint" }
+int64_type    = { "int64" }
+uint64_type   = { "uint64" }
+half_type     = { "half" }
+float_type    = { "float" }
+double_type   = { "double" }
+timecode_type = { "timecode" }
+string_type   = { "string" }
+token_type    = { "token" }
+asset_type    = { "asset" }
+matrix2d_type = { "matrix2d" }
+matrix3d_type = { "matrix3d" }
+matrix4d_type = { "matrix4d" | "frame4d" }
+quath_type    = { "quath" }
+quatf_type    = { "quatf" }
+quatd_type    = { "quatd" }
+int2_type     = { "int2" }
+half2_type    = { "half2" | "texCoord2h" }
+float2_type   = { "float2" | "texCoord2f" }
+double2_type  = { "double2" | "texCoord2d" }
+int3_type     = { "int3" }
+half3_type    = { "half3" | "point3h" | "normal3h" | "vector3f" | "color3h" | "texCoord3h" }
+float3_type   = { "float3" | "point3f" | "normal3f" | "vector3f" | "color3f" | "texCoord3f" }
+double3_type  = { "double3" | "point3d" | "normal3d" | "vector3d" | "color3d" | "texCoord3d" }
+int4_type     = { "int4" }
+half4_type    = { "half4" | "color4h" }
+float4_type   = { "float4" | "color4f" }
+double4_type  = { "double4" | "color4d" }
+value_type    = {
+    bool_type
+  | uchar_type
+  | int64_type
+  | uint64_type
+  | timecode_type
+  | string_type
+  | token_type
+  | asset_type
+  | matrix2d_type
+  | matrix3d_type
+  | matrix4d_type
+  | quath_type
+  | quatf_type
+  | quatd_type
+  | int2_type
+  | half2_type
+  | float2_type
+  | double2_type
+  | int3_type
+  | half3_type
+  | float3_type
+  | double3_type
+  | int4_type
+  | half4_type
+  | float4_type
+  | double4_type
+  | int_type
+  | uint_type
+  | half_type
+  | float_type
+  | double_type
+}
+
+value_array_type = { value_type ~ "[]" }
+type             = { value_array_type | value_type }
+
+// seperators
+list_sep = _{ "," }
+
+// prefix
+property_prefix = { delete | add | prepend | append | reorder }
+
+// relationship
+relationship             =  { property_prefix? ~ relationship_type ~ namespaced_name ~ ("=" ~ relationship_rhs)? ~ metadata? }
+relationship_type        = _{ custom? ~ varying? ~ rel }
+relationship_rhs         = _{ relationship_target_list | relationship_target | none }
+relationship_target_list =  { "[" ~ (relationship_target ~ (list_sep ~ relationship_target)*)? ~ list_sep? ~ "]" }
+relationship_target      = @{ scene_path }
+relationship_for_test    = _{ SOI ~ relationship ~ EOI }
+
+// metadata
+metadata          =  { "(" ~ metadata_item* ~ ")" }
+metadata_item     =  { property_prefix? ~ metadata_key ~ "=" ~ metadata_value }
+metadata_key      = _{ custom_data | symmetry_arguments | identifier }
+metadata_value    =  { none | typed_dictionary | typed_value }
+metadata_for_test = _{ SOI ~ metadata ~ EOI }
+
+// typed dictionary
+typed_dictionary      = { "{" ~ typed_dictionary_item* ~ "}" }
+typed_dictionary_item = { (type ~ dictionary_key ~ "=" ~ typed_value) | (dictionary ~ dictionary_key ~ "=" ~ typed_dictionary) }
+dictionary_key        = { string | identifier }
+
+// typed value
+typed_value             = _{ typed_value_atomic | typed_value_tuple | typed_value_list | "[]" | scene_path }
+typed_value_tuple       =  { "(" ~ typed_value_tuple_items? ~ ")" }
+typed_value_tuple_items =  { typed_value_tuple_item ~ (list_sep ~ typed_value_tuple_item)* ~ list_sep? }
+typed_value_tuple_item  =  { typed_value_atomic | typed_value_tuple }
+typed_value_list        =  { "[" ~ typed_value_list_items? ~ "]" }
+typed_value_list_items  =  { typed_value_list_item ~ (list_sep ~ typed_value_list_item)* ~ list_sep? }
+typed_value_list_item   =  { typed_value_atomic | typed_value_list | typed_value_tuple }
+typed_value_atomic      = _{ number | string | identifier | asset_reference }
+
+// prim attribute
+prim_attribute           =  { prim_attribute_full_type ~ namespaced_name ~ ("=" ~ attribute_value)? ~ metadata? }
+prim_attribute_full_type =  { prim_attr_qualifiers? ~ type }
+prim_attr_qualifiers     =  { custom | uniform | config }
+attribute_value          =  { typed_value | none }
+prim_attribute_for_test  = _{ SOI ~ prim_attribute ~ EOI }
+
+// prim property
+prim_property = { relationship | prim_attribute }
+
+// variant set
+variant_set_stmt          =  { variant_set ~ string ~ "=" ~ "{" ~ variant_stmt+ ~ "}" }
+variant_stmt              =  { string ~ metadata? ~ "{" ~ prim_content* ~ "}" }
+variant_set_stmt_for_test = _{ SOI ~ variant_set_stmt ~ EOI }
+
+// prim
+prim_stmt          =  { (def | class | over) ~ prim_type_name? ~ prim_stmt_body }
+prim_type_name     = @{ identifier ~ ("." ~ identifier)* }
+prim_stmt_body     =  { string ~ prim_metadata? ~ "{" ~ prim_content* ~ "}" }
+prim_content       =  { variant_set_stmt | prim_stmt | prim_property }
+prim_metadata      =  { "(" ~ (layer_ref | metadata_item | string)* ~ ")" }
+layer_ref          =  { property_prefix? ~ metadata_key ~ "=" ~ asset_reference ~ scene_path? }
+prim_stmt_for_test = _{ SOI ~ prim_stmt ~ EOI }
+
+// layer
+layer          =  { layer_header ~ layer_metadata? ~ prim_stmt* }
+layer_header   = @{ "#usda" ~ (!NEWLINE ~ ANY)* }
+layer_metadata =  { "(" ~ (metadata_item | string)* ~ ")" }
+
+// statements
+usd = _{ SOI ~ layer ~ EOI }
