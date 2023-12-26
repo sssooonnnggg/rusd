@@ -96,7 +96,7 @@ keywords = {
 }
 
 // identifiers
-namespaced_name          =  _{ namespace_identifier | identifier }
+namespaced_name          = _{ namespace_identifier | identifier }
 namespaced_name_for_test =  { SOI ~ namespaced_name ~ EOI }
 identifier               = @{ (ASCII_ALPHA | "_") ~ (ASCII_ALPHANUMERIC | "_")* }
 identifier_for_test      =  { SOI ~ identifier ~ EOI }
@@ -132,45 +132,45 @@ int          = @{ "-"? ~ (ASCII_NONZERO_DIGIT ~ ASCII_DIGIT+ | ASCII_DIGIT) }
 int_for_test =  { SOI ~ int ~ EOI }
 
 // float
-float           = @{ "-"? ~ ((ASCII_NONZERO_DIGIT ~ ASCII_DIGIT+) | ASCII_DIGIT) ~ "." ~ ASCII_DIGIT* ~ ("e" ~ int)? }
-float_for_test  =  { SOI ~ float ~ EOI }
+float          = @{ "-"? ~ ((ASCII_NONZERO_DIGIT ~ ASCII_DIGIT+) | ASCII_DIGIT) ~ "." ~ ASCII_DIGIT* ~ ("e" ~ int)? }
+float_for_test =  { SOI ~ float ~ EOI }
 
 // number
 number = _{ float | int }
 
 // value types
-bool_type     = { "bool" }
-uchar_type    = { "uchar" }
-int_type      = { "int" }
-uint_type     = { "uint" }
-int64_type    = { "int64" }
-uint64_type   = { "uint64" }
-half_type     = { "half" }
-float_type    = { "float" }
-double_type   = { "double" }
-timecode_type = { "timecode" }
-string_type   = { "string" }
-token_type    = { "token" }
-asset_type    = { "asset" }
-matrix2d_type = { "matrix2d" }
-matrix3d_type = { "matrix3d" }
-matrix4d_type = { "matrix4d" | "frame4d" }
-quath_type    = { "quath" }
-quatf_type    = { "quatf" }
-quatd_type    = { "quatd" }
-int2_type     = { "int2" }
-half2_type    = { "half2" | "texCoord2h" }
-float2_type   = { "float2" | "texCoord2f" }
-double2_type  = { "double2" | "texCoord2d" }
-int3_type     = { "int3" }
-half3_type    = { "half3" | "point3h" | "normal3h" | "vector3f" | "color3h" | "texCoord3h" }
-float3_type   = { "float3" | "point3f" | "normal3f" | "vector3f" | "color3f" | "texCoord3f" }
-double3_type  = { "double3" | "point3d" | "normal3d" | "vector3d" | "color3d" | "texCoord3d" }
-int4_type     = { "int4" }
-half4_type    = { "half4" | "color4h" }
-float4_type   = { "float4" | "color4f" }
-double4_type  = { "double4" | "color4d" }
-value_type    = {
+bool_type     =  { "bool" }
+uchar_type    =  { "uchar" }
+int_type      =  { "int" }
+uint_type     =  { "uint" }
+int64_type    =  { "int64" }
+uint64_type   =  { "uint64" }
+half_type     =  { "half" }
+float_type    =  { "float" }
+double_type   =  { "double" }
+timecode_type =  { "timecode" }
+string_type   =  { "string" }
+token_type    =  { "token" }
+asset_type    =  { "asset" }
+matrix2d_type =  { "matrix2d" }
+matrix3d_type =  { "matrix3d" }
+matrix4d_type =  { "matrix4d" | "frame4d" }
+quath_type    =  { "quath" }
+quatf_type    =  { "quatf" }
+quatd_type    =  { "quatd" }
+int2_type     =  { "int2" }
+half2_type    =  { "half2" | "texCoord2h" }
+float2_type   =  { "float2" | "texCoord2f" }
+double2_type  =  { "double2" | "texCoord2d" }
+int3_type     =  { "int3" }
+half3_type    =  { "half3" | "point3h" | "normal3h" | "vector3f" | "color3h" | "texCoord3h" }
+float3_type   =  { "float3" | "point3f" | "normal3f" | "vector3f" | "color3f" | "texCoord3f" }
+double3_type  =  { "double3" | "point3d" | "normal3d" | "vector3d" | "color3d" | "texCoord3d" }
+int4_type     =  { "int4" }
+half4_type    =  { "half4" | "color4h" }
+float4_type   =  { "float4" | "color4f" }
+double4_type  =  { "double4" | "color4d" }
+value_type    = _{
     bool_type
   | uchar_type
   | int64_type
@@ -204,28 +204,28 @@ value_type    = {
   | double_type
 }
 
-value_array_type = { value_type ~ "[]" }
-type             = { value_array_type | value_type }
+value_array_type =  { value_type ~ "[]" }
+type             = _{ value_array_type | value_type }
 
 // seperators
 list_sep = _{ "," }
 
 // prefix
-property_prefix = { delete | add | prepend | append | reorder }
+property_prefix = _{ delete | add | prepend | append | reorder }
 
 // relationship
 relationship             =  { property_prefix? ~ relationship_type ~ namespaced_name ~ ("=" ~ relationship_rhs)? ~ metadata? }
 relationship_type        = _{ custom? ~ varying? ~ rel }
 relationship_rhs         = _{ relationship_target_list | relationship_target | none }
 relationship_target_list =  { "[" ~ (relationship_target ~ (list_sep ~ relationship_target)*)? ~ list_sep? ~ "]" }
-relationship_target      = @{ scene_path }
+relationship_target      = _{ scene_path }
 relationship_for_test    = _{ SOI ~ relationship ~ EOI }
 
 // metadata
 metadata          =  { "(" ~ metadata_item* ~ ")" }
 metadata_item     =  { property_prefix? ~ metadata_key ~ "=" ~ metadata_value }
 metadata_key      = _{ custom_data | symmetry_arguments | identifier }
-metadata_value    =  { none | typed_dictionary | typed_value }
+metadata_value    = _{ none | typed_dictionary | typed_value }
 metadata_for_test = _{ SOI ~ metadata ~ EOI }
 
 // typed dictionary
@@ -236,18 +236,18 @@ dictionary_key        = { string | identifier }
 // typed value
 typed_value             = _{ typed_value_atomic | typed_value_tuple | typed_value_list | "[]" | scene_path }
 typed_value_tuple       =  { "(" ~ typed_value_tuple_items? ~ ")" }
-typed_value_tuple_items =  { typed_value_tuple_item ~ (list_sep ~ typed_value_tuple_item)* ~ list_sep? }
-typed_value_tuple_item  =  { typed_value_atomic | typed_value_tuple }
+typed_value_tuple_items = _{ typed_value_tuple_item ~ (list_sep ~ typed_value_tuple_item)* ~ list_sep? }
+typed_value_tuple_item  = _{ typed_value_atomic | typed_value_tuple }
 typed_value_list        =  { "[" ~ typed_value_list_items? ~ "]" }
-typed_value_list_items  =  { typed_value_list_item ~ (list_sep ~ typed_value_list_item)* ~ list_sep? }
-typed_value_list_item   =  { typed_value_atomic | typed_value_list | typed_value_tuple }
+typed_value_list_items  = _{ typed_value_list_item ~ (list_sep ~ typed_value_list_item)* ~ list_sep? }
+typed_value_list_item   = _{ typed_value_atomic | typed_value_list | typed_value_tuple }
 typed_value_atomic      = _{ number | string | identifier | asset_reference }
 
 // prim attribute
 prim_attribute           =  { prim_attribute_full_type ~ namespaced_name ~ ("=" ~ attribute_value)? ~ metadata? }
 prim_attribute_full_type =  { prim_attr_qualifiers? ~ type }
-prim_attr_qualifiers     =  { custom | uniform | config }
-attribute_value          =  { typed_value | none }
+prim_attr_qualifiers     = _{ custom | uniform | config }
+attribute_value          = _{ typed_value | none }
 prim_attribute_for_test  = _{ SOI ~ prim_attribute ~ EOI }
 
 // prim property
