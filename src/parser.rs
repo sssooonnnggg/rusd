@@ -1,15 +1,12 @@
+use pest::Parser;
 use pest_derive::Parser;
 
 #[derive(Parser)]
 #[grammar = "usd.pest"]
 pub struct UsdParser;
 
-#[cfg(test)]
-mod tests {
-    use super::*;
-    use pest::Parser;
-
-    fn print_pairs(pair: pest::iterators::Pair<Rule>, depth: usize) {
+pub fn print_pairs(pairs: pest::iterators::Pairs<Rule>, depth: usize) {
+    for pair in pairs.clone() {
         let indent = depth * 4;
         println!(
             "{:indent$}rule: {:?}, str: {}",
@@ -18,19 +15,18 @@ mod tests {
             pair.as_str(),
             indent = indent
         );
-        for inner_pair in pair.into_inner() {
-            print_pairs(inner_pair, depth + 1);
-        }
+        print_pairs(pair.into_inner(), depth + 1);
     }
+}
 
-    fn print_and_test(rule: Rule, input: &str) {
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    pub fn print_and_test(rule: Rule, input: &str) {
         let result = UsdParser::parse(rule, input);
         match &result {
-            Ok(pairs) => {
-                for pair in pairs.clone() {
-                    print_pairs(pair, 0);
-                }
-            }
+            Ok(pairs) => print_pairs(pairs.clone(), 0),
             Err(e) => println!("Error: {}", e),
         }
         assert!(result.is_ok());
@@ -56,6 +52,13 @@ mod tests {
         line3
         */"#,
         );
+    }
+
+    #[test]
+    fn test_comment_and_whitespace() {
+        print_and_test(Rule::float_for_test, r#"  // something
+            // something 2
+        1.234"#);
     }
 
     #[test]

@@ -1,55 +1,55 @@
 // comments
-COMMENT                     = _{ single_line_comment | multi_line_comment }
-single_line_comment_content =  { (!NEWLINE ~ ANY)* }
+comments                    = _{ single_line_comment | multi_line_comment }
+single_line_comment_content = _{ (!NEWLINE ~ ANY)* }
 single_line_comment         = _{ "//" ~ single_line_comment_content ~ NEWLINE? }
-multi_line_comment_content  =  { (!"*/" ~ ANY)* }
+multi_line_comment_content  = _{ (!"*/" ~ ANY)* }
 multi_line_comment          = _{ "/*" ~ multi_line_comment_content ~ "*/" }
 
 // whitespace
-WHITESPACE = _{ " " | ";" | NEWLINE }
+WHITESPACE = _{ " " | NEWLINE | ";" | comments }
 
 // keywords
-add                 = { "add" }
-append              = { "append" }
-class               = { "class" }
-config              = { "config" }
-connect             = { "connect" }
-custom              = { "custom" }
-custom_data         = { "customData" }
-default             = { "default" }
-def                 = { "def" }
-delete              = { "delete" }
-dictionary          = { "dictionary" }
-displayUnit         = { "displayUnit" }
-doc                 = { "doc" }
-inherits            = { "inherits" }
-kind                = { "kind" }
-nameChildren        = { "nameChildren" }
-none                = { "None" }
-offset              = { "offset" }
-over                = { "over" }
-payload             = { "payload" }
-permission          = { "permission" }
-prefixSubstitutions = { "prefixSubstitutions" }
-prepend             = { "prepend" }
-properties          = { "properties" }
-references          = { "references" }
-relocates           = { "relocates" }
-rel                 = { "rel" }
-reorder             = { "reorder" }
-rootPrims           = { "rootPrims" }
-scale               = { "scale" }
-subLayers           = { "subLayers" }
-suffixSubstitutions = { "suffixSubstitutions" }
-specializes         = { "specializes" }
-symmetry_arguments  = { "symmetryArguments" }
-symmetryFunction    = { "symmetryFunction" }
-timeSamples         = { "timeSamples" }
-uniform             = { "uniform" }
-variant_set         = { "variantSet" }
-variant_sets        = { "variantSets" }
-variants            = { "variants" }
-varying             = { "varying" }
+add                 = _{ "add" }
+append              = _{ "append" }
+class               = _{ "class" }
+config              = _{ "config" }
+connect             = _{ "connect" }
+custom              = _{ "custom" }
+custom_data         = _{ "customData" }
+default             = _{ "default" }
+def                 = _{ "def" }
+delete              = _{ "delete" }
+dictionary          = _{ "dictionary" }
+displayUnit         = _{ "displayUnit" }
+doc                 = _{ "doc" }
+inherits            = _{ "inherits" }
+kind                = _{ "kind" }
+nameChildren        = _{ "nameChildren" }
+none                = _{ "None" }
+offset              = _{ "offset" }
+over                = _{ "over" }
+payload             = _{ "payload" }
+permission          = _{ "permission" }
+prefixSubstitutions = _{ "prefixSubstitutions" }
+prepend             = _{ "prepend" }
+properties          = _{ "properties" }
+references          = _{ "references" }
+relocates           = _{ "relocates" }
+rel                 = _{ "rel" }
+reorder             = _{ "reorder" }
+rootPrims           = _{ "rootPrims" }
+scale               = _{ "scale" }
+subLayers           = _{ "subLayers" }
+suffixSubstitutions = _{ "suffixSubstitutions" }
+specializes         = _{ "specializes" }
+symmetry_arguments  = _{ "symmetryArguments" }
+symmetryFunction    = _{ "symmetryFunction" }
+timeSamples         = _{ "timeSamples" }
+uniform             = _{ "uniform" }
+variant_set         = _{ "variantSet" }
+variant_sets        = _{ "variantSets" }
+variants            = _{ "variants" }
+varying             = _{ "varying" }
 
 keywords = {
     add
@@ -96,7 +96,7 @@ keywords = {
 }
 
 // identifiers
-namespaced_name          =  { namespace_identifier | identifier }
+namespaced_name          =  _{ namespace_identifier | identifier }
 namespaced_name_for_test =  { SOI ~ namespaced_name ~ EOI }
 identifier               = @{ (ASCII_ALPHA | "_") ~ (ASCII_ALPHANUMERIC | "_")* }
 identifier_for_test      =  { SOI ~ identifier ~ EOI }
@@ -132,8 +132,7 @@ int          = @{ "-"? ~ (ASCII_NONZERO_DIGIT ~ ASCII_DIGIT+ | ASCII_DIGIT) }
 int_for_test =  { SOI ~ int ~ EOI }
 
 // float
-float           = @{ float_left_part ~ "." ~ ASCII_DIGIT* ~ ("e" ~ int)? }
-float_left_part = @{ "-"? ~ ((ASCII_NONZERO_DIGIT ~ ASCII_DIGIT+) | ASCII_DIGIT) }
+float           = @{ "-"? ~ ((ASCII_NONZERO_DIGIT ~ ASCII_DIGIT+) | ASCII_DIGIT) ~ "." ~ ASCII_DIGIT* ~ ("e" ~ int)? }
 float_for_test  =  { SOI ~ float ~ EOI }
 
 // number
