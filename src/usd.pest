@@ -17,17 +17,17 @@ namespace_identifier     = @{ identifier ~ (":" ~ identifier)+ }
 
 // path or reference
 scene_path       = ${ "<" ~ scene_path_value ~ ">" }
-scene_path_value =  @{ (!("<" | ">" | NEWLINE) ~ ANY)* }
+scene_path_value = @{ (!("<" | ">" | NEWLINE) ~ ANY)* }
 
 asset_reference       = ${ "@" ~ asset_reference_value ~ "@" }
-asset_reference_value =  @{ (!("@" | NEWLINE) ~ ANY)* }
+asset_reference_value = @{ (!("@" | NEWLINE) ~ ANY)* }
 
 // string
-string                            = _{ triple_quoted_string | single_quoted_string | double_quoted_string }
-single_quoted_string              = @{ "'" ~ ((!("'" | newline_or_escape) ~ ANY) | escaped_char)* ~ "'" }
-double_quoted_string              = @{ "\"" ~ ((!("\"" | newline_or_escape) ~ ANY) | escaped_char)* ~ "\"" }
+string               = _{ triple_quoted_string | single_quoted_string | double_quoted_string }
+single_quoted_string = @{ "'" ~ ((!("'" | newline_or_escape) ~ ANY) | escaped_char)* ~ "'" }
+double_quoted_string = @{ "\"" ~ ((!("\"" | newline_or_escape) ~ ANY) | escaped_char)* ~ "\"" }
 
-triple_quoted_string       = @{ PUSH("\"\"\"" | "'''") ~ (!PEEK ~ ANY)* ~ POP }
+triple_quoted_string = @{ PUSH("\"\"\"" | "'''") ~ (!PEEK ~ ANY)* ~ POP }
 
 escaped_char          = @{ "\\" ~ ANY }
 escaped_char_for_test =  { SOI ~ escaped_char ~ EOI }
@@ -118,12 +118,12 @@ type             = _{ value_type ~ "[]"? }
 list_sep = _{ "," }
 
 // prefix
-property_prefix = _{ "delete" | "add" | "prepend" | "append" | "reorder" }
+property_prefix = @{ "delete" | "add" | "prepend" | "append" | "reorder" }
 
 // relationship
 relationship             =  { property_prefix? ~ relationship_type ~ namespaced_name ~ ("=" ~ relationship_rhs)? ~ metadata? }
 relationship_type        = _{ "custom"? ~ "varying"? ~ "rel" }
-relationship_rhs         = _{ relationship_target_list | relationship_target | "None" }
+relationship_rhs         = _{ relationship_target | relationship_target_list | "None" }
 relationship_target_list =  { "[" ~ (relationship_target ~ (list_sep ~ relationship_target)*)? ~ list_sep? ~ "]" }
 relationship_target      = _{ scene_path }
 relationship_for_test    = _{ SOI ~ relationship ~ EOI }
@@ -147,7 +147,7 @@ typed_value_tuple_items = _{ typed_value_tuple_item ~ (list_sep ~ typed_value_tu
 typed_value_tuple_item  = _{ typed_value_atomic | typed_value_tuple }
 typed_value_list        =  { "[" ~ typed_value_list_items? ~ "]" }
 typed_value_list_items  = _{ typed_value_list_item ~ (list_sep ~ typed_value_list_item)* ~ list_sep? }
-typed_value_list_item   = _{ typed_value_atomic | typed_value_list | typed_value_tuple }
+typed_value_list_item   = _{ typed_value_atomic | typed_value_tuple | typed_value_list }
 typed_value_atomic      = _{ number | string | identifier | asset_reference }
 
 // prim attribute
