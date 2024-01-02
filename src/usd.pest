@@ -1,5 +1,5 @@
 // comments
-comments                    = _{ single_line_comment | multi_line_comment }
+comments                    = _{ &"/" ~ (single_line_comment | multi_line_comment) }
 single_line_comment_content = _{ (!NEWLINE ~ ANY)* }
 single_line_comment         = _{ "//" ~ single_line_comment_content ~ NEWLINE? }
 multi_line_comment_content  = _{ (!"*/" ~ ANY)* }
@@ -136,7 +136,8 @@ float          = @{ "-"? ~ ((ASCII_NONZERO_DIGIT ~ ASCII_DIGIT+) | ASCII_DIGIT) 
 float_for_test =  { SOI ~ float ~ EOI }
 
 // number
-number = _{ float | int }
+number          = @{ "-"? ~ ((ASCII_NONZERO_DIGIT ~ ASCII_DIGIT+) | ASCII_DIGIT) ~ ("." ~ ASCII_DIGIT*)? ~ ("e" ~ ("-" | "+")? ~ ((ASCII_NONZERO_DIGIT ~ ASCII_DIGIT+) | ASCII_DIGIT))? }
+number_for_test =  { SOI ~ number ~ EOI }
 
 // value types
 bool_type     =  { "bool" }
@@ -245,7 +246,7 @@ typed_value_atomic      = _{ number | string | identifier | asset_reference }
 
 // prim attribute
 prim_attribute           =  { prim_attribute_full_type ~ namespaced_name ~ ("=" ~ attribute_value)? ~ metadata? }
-prim_attribute_full_type =  { prim_attr_qualifiers? ~ type }
+prim_attribute_full_type = _{ prim_attr_qualifiers? ~ type }
 prim_attr_qualifiers     = _{ custom | uniform | config }
 attribute_value          = _{ typed_value | none }
 prim_attribute_for_test  = _{ SOI ~ prim_attribute ~ EOI }

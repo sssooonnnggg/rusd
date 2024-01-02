@@ -192,57 +192,45 @@ mod tests {
 
     #[test]
     fn test_int() {
-        print_and_test(Rule::int, "0");
-        print_and_test(Rule::int, "1");
-        print_and_test(Rule::int, "123");
-        print_and_test(Rule::int, "-123");
-        print_and_test(Rule::int, "-2");
+        print_and_test(Rule::number_for_test, "0");
+        print_and_test(Rule::number_for_test, "1");
+        print_and_test(Rule::number_for_test, "123");
+        print_and_test(Rule::number_for_test, "-123");
+        print_and_test(Rule::number_for_test, "-2");
     }
 
     #[test]
     #[should_panic]
     fn test_int_invalid() {
-        print_and_test(Rule::int_for_test, "0123");
-    }
-
-    #[test]
-    #[should_panic]
-    fn test_int_invalid_1() {
-        print_and_test(Rule::int_for_test, "123.456");
+        print_and_test(Rule::number_for_test, "0123");
     }
 
     #[test]
     #[should_panic]
     fn test_int_invalid_2() {
-        print_and_test(Rule::int_for_test, "123 456");
+        print_and_test(Rule::number_for_test, "123 456");
     }
 
     #[test]
     fn test_float() {
-        print_and_test(Rule::float_for_test, "0.0");
-        print_and_test(Rule::float_for_test, "0.");
-        print_and_test(Rule::float_for_test, "1.");
-        print_and_test(Rule::float_for_test, "123.456");
-        print_and_test(Rule::float_for_test, "-123.456");
-        print_and_test(Rule::float_for_test, "5.9604641222676946e-8")
+        print_and_test(Rule::number_for_test, "0.0");
+        print_and_test(Rule::number_for_test, "0.");
+        print_and_test(Rule::number_for_test, "1.");
+        print_and_test(Rule::number_for_test, "123.456");
+        print_and_test(Rule::number_for_test, "-123.456");
+        print_and_test(Rule::number_for_test, "5.9604641222676946e-8")
     }
 
     #[test]
     #[should_panic]
     fn test_float_invalid() {
-        print_and_test(Rule::float_for_test, "0123.456");
-    }
-
-    #[test]
-    #[should_panic]
-    fn test_float_invalid_1() {
-        print_and_test(Rule::float_for_test, "123");
+        print_and_test(Rule::number_for_test, "0123.456");
     }
 
     #[test]
     #[should_panic]
     fn test_float_invalid_2() {
-        print_and_test(Rule::float_for_test, "123 456");
+        print_and_test(Rule::number_for_test, "123 456");
     }
 
     #[test]
