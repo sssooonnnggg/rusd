@@ -8,93 +8,6 @@ multi_line_comment          = _{ "/*" ~ multi_line_comment_content ~ "*/" }
 // whitespace
 WHITESPACE = _{ " " | NEWLINE | ";" | comments }
 
-// keywords
-add                 = _{ "add" }
-append              = _{ "append" }
-class               = _{ "class" }
-config              = _{ "config" }
-connect             = _{ "connect" }
-custom              = _{ "custom" }
-custom_data         = _{ "customData" }
-default             = _{ "default" }
-def                 = _{ "def" }
-delete              = _{ "delete" }
-dictionary          = _{ "dictionary" }
-displayUnit         = _{ "displayUnit" }
-doc                 = _{ "doc" }
-inherits            = _{ "inherits" }
-kind                = _{ "kind" }
-nameChildren        = _{ "nameChildren" }
-none                = _{ "None" }
-offset              = _{ "offset" }
-over                = _{ "over" }
-payload             = _{ "payload" }
-permission          = _{ "permission" }
-prefixSubstitutions = _{ "prefixSubstitutions" }
-prepend             = _{ "prepend" }
-properties          = _{ "properties" }
-references          = _{ "references" }
-relocates           = _{ "relocates" }
-rel                 = _{ "rel" }
-reorder             = _{ "reorder" }
-rootPrims           = _{ "rootPrims" }
-scale               = _{ "scale" }
-subLayers           = _{ "subLayers" }
-suffixSubstitutions = _{ "suffixSubstitutions" }
-specializes         = _{ "specializes" }
-symmetry_arguments  = _{ "symmetryArguments" }
-symmetryFunction    = _{ "symmetryFunction" }
-timeSamples         = _{ "timeSamples" }
-uniform             = _{ "uniform" }
-variant_set         = _{ "variantSet" }
-variant_sets        = _{ "variantSets" }
-variants            = _{ "variants" }
-varying             = _{ "varying" }
-
-keywords = {
-    add
-  | append
-  | class
-  | config
-  | connect
-  | custom
-  | custom_data
-  | default
-  | def
-  | delete
-  | dictionary
-  | displayUnit
-  | doc
-  | inherits
-  | kind
-  | nameChildren
-  | none
-  | offset
-  | over
-  | payload
-  | permission
-  | prefixSubstitutions
-  | prepend
-  | properties
-  | references
-  | relocates
-  | rel
-  | reorder
-  | rootPrims
-  | scale
-  | subLayers
-  | suffixSubstitutions
-  | specializes
-  | symmetry_arguments
-  | symmetryFunction
-  | timeSamples
-  | uniform
-  | variant_set
-  | variant_sets
-  | variants
-  | varying
-}
-
 // identifiers
 namespaced_name          = _{ namespace_identifier | identifier }
 namespaced_name_for_test =  { SOI ~ namespaced_name ~ EOI }
@@ -103,29 +16,22 @@ identifier_for_test      =  { SOI ~ identifier ~ EOI }
 namespace_identifier     = @{ identifier ~ (":" ~ identifier)+ }
 
 // path or reference
-scene_path       = _{ "<" ~ scene_path_value ~ ">" }
-scene_path_value =  { (!("<" | ">" | NEWLINE) ~ ANY)* }
+scene_path       = ${ "<" ~ scene_path_value ~ ">" }
+scene_path_value =  @{ (!("<" | ">" | NEWLINE) ~ ANY)* }
 
-asset_reference       = _{ "@" ~ asset_reference_value ~ "@" }
-asset_reference_value =  { (!("@" | NEWLINE) ~ ANY)* }
+asset_reference       = ${ "@" ~ asset_reference_value ~ "@" }
+asset_reference_value =  @{ (!("@" | NEWLINE) ~ ANY)* }
 
 // string
 string                            = _{ triple_quoted_string | single_quoted_string | double_quoted_string }
-single_quoted_string              = _{ "'" ~ single_quoted_string_value ~ "'" }
-single_quoted_string_normal_chars = _{ !("'" | newline_or_escape) ~ ANY }
-single_quoted_string_value        =  { (single_quoted_string_normal_chars | escaped_char)* }
+single_quoted_string              = @{ "'" ~ ((!("'" | newline_or_escape) ~ ANY) | escaped_char)* ~ "'" }
+double_quoted_string              = @{ "\"" ~ ((!("\"" | newline_or_escape) ~ ANY) | escaped_char)* ~ "\"" }
 
-double_quoted_string              = _{ "\"" ~ double_quoted_string_value ~ "\"" }
-double_quoted_string_normal_chars = _{ !("\"" | newline_or_escape) ~ ANY }
-double_quoted_string_value        =  { (double_quoted_string_normal_chars | escaped_char)* }
+triple_quoted_string       = @{ PUSH("\"\"\"" | "'''") ~ (!PEEK ~ ANY)* ~ POP }
 
-triple_quoted_string       = _{ PUSH("\"\"\"" | "'''") ~ triple_quoted_string_value ~ POP }
-triple_quoted_string_value =  { (!PEEK ~ ANY)* }
-
-escaped               = _{ "\\" }
-escaped_char          = @{ escaped ~ ANY }
+escaped_char          = @{ "\\" ~ ANY }
 escaped_char_for_test =  { SOI ~ escaped_char ~ EOI }
-newline_or_escape     = _{ escaped | NEWLINE }
+newline_or_escape     = @{ "\\" | NEWLINE }
 
 // int
 int          = @{ "-"? ~ (ASCII_NONZERO_DIGIT ~ ASCII_DIGIT+ | ASCII_DIGIT) }
@@ -206,18 +112,18 @@ value_type    = _{
 }
 
 value_array_type =  { value_type ~ "[]" }
-type             = _{ value_array_type | value_type }
+type             = _{ value_type ~ "[]"? }
 
 // seperators
 list_sep = _{ "," }
 
 // prefix
-property_prefix = _{ delete | add | prepend | append | reorder }
+property_prefix = _{ "delete" | "add" | "prepend" | "append" | "reorder" }
 
 // relationship
 relationship             =  { property_prefix? ~ relationship_type ~ namespaced_name ~ ("=" ~ relationship_rhs)? ~ metadata? }
-relationship_type        = _{ custom? ~ varying? ~ rel }
-relationship_rhs         = _{ relationship_target_list | relationship_target | none }
+relationship_type        = _{ "custom"? ~ "varying"? ~ "rel" }
+relationship_rhs         = _{ relationship_target_list | relationship_target | "None" }
 relationship_target_list =  { "[" ~ (relationship_target ~ (list_sep ~ relationship_target)*)? ~ list_sep? ~ "]" }
 relationship_target      = _{ scene_path }
 relationship_for_test    = _{ SOI ~ relationship ~ EOI }
@@ -225,13 +131,13 @@ relationship_for_test    = _{ SOI ~ relationship ~ EOI }
 // metadata
 metadata          =  { "(" ~ metadata_item* ~ ")" }
 metadata_item     =  { property_prefix? ~ metadata_key ~ "=" ~ metadata_value }
-metadata_key      = _{ custom_data | symmetry_arguments | identifier }
-metadata_value    = _{ none | typed_dictionary | typed_value }
+metadata_key      = _{ "customData" | identifier }
+metadata_value    = _{ "None" | typed_dictionary | typed_value }
 metadata_for_test = _{ SOI ~ metadata ~ EOI }
 
 // typed dictionary
 typed_dictionary      = { "{" ~ typed_dictionary_item* ~ "}" }
-typed_dictionary_item = { (type ~ dictionary_key ~ "=" ~ typed_value) | (dictionary ~ dictionary_key ~ "=" ~ typed_dictionary) }
+typed_dictionary_item = { (type ~ dictionary_key ~ "=" ~ typed_value) | ("dictionary" ~ dictionary_key ~ "=" ~ typed_dictionary) }
 dictionary_key        = { string | identifier }
 
 // typed value
@@ -247,20 +153,20 @@ typed_value_atomic      = _{ number | string | identifier | asset_reference }
 // prim attribute
 prim_attribute           =  { prim_attribute_full_type ~ namespaced_name ~ ("=" ~ attribute_value)? ~ metadata? }
 prim_attribute_full_type = _{ prim_attr_qualifiers? ~ type }
-prim_attr_qualifiers     = _{ custom | uniform | config }
-attribute_value          = _{ typed_value | none }
+prim_attr_qualifiers     = _{ "custom" | "uniform" | "config" }
+attribute_value          = _{ typed_value | "None" }
 prim_attribute_for_test  = _{ SOI ~ prim_attribute ~ EOI }
 
 // prim property
 prim_property = { relationship | prim_attribute }
 
 // variant set
-variant_set_stmt          =  { variant_set ~ string ~ "=" ~ "{" ~ variant_stmt+ ~ "}" }
+variant_set_stmt          =  { "variantSet" ~ string ~ "=" ~ "{" ~ variant_stmt+ ~ "}" }
 variant_stmt              =  { string ~ metadata? ~ "{" ~ prim_content* ~ "}" }
 variant_set_stmt_for_test = _{ SOI ~ variant_set_stmt ~ EOI }
 
 // prim
-prim_stmt          =  { (def | class | over) ~ prim_type_name? ~ prim_stmt_body }
+prim_stmt          =  { ("def" | "class" | "over") ~ prim_type_name? ~ prim_stmt_body }
 prim_type_name     = @{ identifier ~ ("." ~ identifier)* }
 prim_stmt_body     =  { string ~ prim_metadata? ~ "{" ~ prim_content* ~ "}" }
 prim_content       =  { variant_set_stmt | prim_stmt | prim_property }
@@ -270,7 +176,7 @@ prim_stmt_for_test = _{ SOI ~ prim_stmt ~ EOI }
 
 // layer
 layer          =  { layer_header ~ layer_metadata? ~ prim_stmt* }
-layer_header   = @{ "#usda" ~ (!NEWLINE ~ ANY)* }
+layer_header   = @{ "#" ~ "usda" ~ (!NEWLINE ~ ANY)* }
 layer_metadata =  { "(" ~ (metadata_item | string)* ~ ")" }
 
 // statements
