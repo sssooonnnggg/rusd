@@ -5,15 +5,18 @@ single_line_comment         = _{ "//" ~ single_line_comment_content ~ NEWLINE? }
 multi_line_comment_content  = _{ (!"*/" ~ ANY)* }
 multi_line_comment          = _{ "/*" ~ multi_line_comment_content ~ "*/" }
 
-// whitespace
-WHITESPACE = _{ " " | NEWLINE | ";" | comments }
+// whitespace with comments
+// WHITESPACE = _{ " " | NEWLINE | ";" | comments }
+
+// whitespace without comments
+WHITESPACE = _{ " " | NEWLINE | ";" }
 
 // identifiers
 namespaced_name          = _{ namespace_identifier | identifier }
 namespaced_name_for_test =  { SOI ~ namespaced_name ~ EOI }
 identifier               = @{ (ASCII_ALPHA | "_") ~ (ASCII_ALPHANUMERIC | "_")* }
 identifier_for_test      =  { SOI ~ identifier ~ EOI }
-namespace_identifier     = @{ identifier ~ (":" ~ identifier)+ }
+namespace_identifier     = @{ (ASCII_ALPHA | "_") ~ (ASCII_ALPHANUMERIC | "_")* ~ (":" ~ (ASCII_ALPHA | "_") ~ (ASCII_ALPHANUMERIC | "_")*)+ }
 
 // path or reference
 scene_path       = ${ "<" ~ scene_path_value ~ ">" }
@@ -45,80 +48,35 @@ float_for_test =  { SOI ~ float ~ EOI }
 number          = @{ "-"? ~ ((ASCII_NONZERO_DIGIT ~ ASCII_DIGIT+) | ASCII_DIGIT) ~ ("." ~ ASCII_DIGIT*)? ~ ("e" ~ ("-" | "+")? ~ ((ASCII_NONZERO_DIGIT ~ ASCII_DIGIT+) | ASCII_DIGIT))? }
 number_for_test =  { SOI ~ number ~ EOI }
 
-// value types
-bool_type     =  { "bool" }
-uchar_type    =  { "uchar" }
-int_type      =  { "int" }
-uint_type     =  { "uint" }
-int64_type    =  { "int64" }
-uint64_type   =  { "uint64" }
-half_type     =  { "half" }
-float_type    =  { "float" }
-double_type   =  { "double" }
-timecode_type =  { "timecode" }
-string_type   =  { "string" }
-token_type    =  { "token" }
-asset_type    =  { "asset" }
-matrix2d_type =  { "matrix2d" }
-matrix3d_type =  { "matrix3d" }
-matrix4d_type =  { "matrix4d" | "frame4d" }
-quath_type    =  { "quath" }
-quatf_type    =  { "quatf" }
-quatd_type    =  { "quatd" }
-int2_type     =  { "int2" }
-half2_type    =  { "half2" | "texCoord2h" }
-float2_type   =  { "float2" | "texCoord2f" }
-double2_type  =  { "double2" | "texCoord2d" }
-int3_type     =  { "int3" }
-half3_type    =  { "half3" | "point3h" | "normal3h" | "vector3f" | "color3h" | "texCoord3h" }
-float3_type   =  { "float3" | "point3f" | "normal3f" | "vector3f" | "color3f" | "texCoord3f" }
-double3_type  =  { "double3" | "point3d" | "normal3d" | "vector3d" | "color3d" | "texCoord3d" }
-int4_type     =  { "int4" }
-half4_type    =  { "half4" | "color4h" }
-float4_type   =  { "float4" | "color4f" }
-double4_type  =  { "double4" | "color4d" }
-value_type    = _{
-    bool_type
-  | uchar_type
-  | int64_type
-  | uint64_type
-  | timecode_type
-  | string_type
-  | token_type
-  | asset_type
-  | matrix2d_type
-  | matrix3d_type
-  | matrix4d_type
-  | quath_type
-  | quatf_type
-  | quatd_type
-  | int2_type
-  | half2_type
-  | float2_type
-  | double2_type
-  | int3_type
-  | half3_type
-  | float3_type
-  | double3_type
-  | int4_type
-  | half4_type
-  | float4_type
-  | double4_type
-  | int_type
-  | uint_type
-  | half_type
-  | float_type
-  | double_type
+value_type = _{
+    "bool"
+  | ("int" ~ ("2" | "3" | "4" | "64")?)
+  | ("float" ~ ("2" | "3" | "4")?)
+  | ("double" ~ ("2" | "3" | "4")?)
+  | ("half" ~ ("2" | "3" | "4")?)
+  | ("uint" ~ "64"?)
+  | "string"
+  | "token"
+  | "asset"
+  | ("matrix" ~ ("2d" | "3d" | "4d"))
+  | ("quat" ~ ("h" | "f" | "d"))
+  | ("point" ~ ("3h" | "3f" | "3d"))
+  | ("normal" ~ ("3h" | "3f" | "3d"))
+  | ("vector" ~ ("3h" | "3f" | "3d"))
+  | ("texCoord" ~ ("2h" | "2f" | "2d" | "3h" | "3f" | "3d"))
+  | ("color" ~ ("3h" | "3f" | "3d" | "4h" | "4f" | "4d"))
+  | "uchar"
+  | "frame4d"
+  | "timecode"
 }
 
-value_array_type =  { value_type ~ "[]" }
-type             = _{ value_type ~ "[]"? }
+type = @{ value_type ~ "[]"? }
 
 // seperators
 list_sep = _{ "," }
 
 // prefix
-property_prefix = @{ "delete" | "add" | "prepend" | "append" | "reorder" }
+property_prefix = _{ "delete" | "add" | "prepend" | "append" | "reorder" }
 
 // relationship
 relationship             =  { property_prefix? ~ relationship_type ~ namespaced_name ~ ("=" ~ relationship_rhs)? ~ metadata? }
@@ -136,12 +94,12 @@ metadata_value    = _{ "None" | typed_dictionary | typed_value }
 metadata_for_test = _{ SOI ~ metadata ~ EOI }
 
 // typed dictionary
-typed_dictionary      = { "{" ~ typed_dictionary_item* ~ "}" }
-typed_dictionary_item = { (type ~ dictionary_key ~ "=" ~ typed_value) | ("dictionary" ~ dictionary_key ~ "=" ~ typed_dictionary) }
-dictionary_key        = { string | identifier }
+typed_dictionary      =  { "{" ~ typed_dictionary_item* ~ "}" }
+typed_dictionary_item =  { (type ~ dictionary_key ~ "=" ~ typed_value) | ("dictionary" ~ dictionary_key ~ "=" ~ typed_dictionary) }
+dictionary_key        = _{ string | identifier }
 
 // typed value
-typed_value             = _{ typed_value_atomic | typed_value_tuple | typed_value_list | "[]" | scene_path }
+typed_value             = _{ typed_value_atomic | typed_value_tuple | typed_value_list | scene_path }
 typed_value_tuple       =  { "(" ~ typed_value_tuple_items? ~ ")" }
 typed_value_tuple_items = _{ typed_value_tuple_item ~ (list_sep ~ typed_value_tuple_item)* ~ list_sep? }
 typed_value_tuple_item  = _{ typed_value_atomic | typed_value_tuple }
@@ -151,26 +109,21 @@ typed_value_list_item   = _{ typed_value_atomic | typed_value_tuple | typed_valu
 typed_value_atomic      = _{ number | string | identifier | asset_reference }
 
 // prim attribute
-prim_attribute           =  { prim_attribute_full_type ~ namespaced_name ~ ("=" ~ attribute_value)? ~ metadata? }
-prim_attribute_full_type = _{ prim_attr_qualifiers? ~ type }
-prim_attr_qualifiers     = _{ "custom" | "uniform" | "config" }
-attribute_value          = _{ typed_value | "None" }
-prim_attribute_for_test  = _{ SOI ~ prim_attribute ~ EOI }
+prim_attribute          =  { ("custom" | "uniform" | "config")? ~ type ~ namespaced_name ~ ("=" ~ (typed_value | "None"))? ~ metadata? }
+prim_attribute_for_test = _{ SOI ~ prim_attribute ~ EOI }
 
 // prim property
-prim_property = { relationship | prim_attribute }
+prim_property = _{ relationship | prim_attribute }
 
 // variant set
-variant_set_stmt          =  { "variantSet" ~ string ~ "=" ~ "{" ~ variant_stmt+ ~ "}" }
-variant_stmt              =  { string ~ metadata? ~ "{" ~ prim_content* ~ "}" }
+variant_set_stmt          = _{ "variantSet" ~ string ~ "=" ~ "{" ~ variant_stmt+ ~ "}" }
+variant_stmt              = _{ string ~ metadata? ~ "{" ~ prim_content* ~ "}" }
 variant_set_stmt_for_test = _{ SOI ~ variant_set_stmt ~ EOI }
 
 // prim
-prim_stmt          =  { ("def" | "class" | "over") ~ prim_type_name? ~ prim_stmt_body }
-prim_type_name     = @{ identifier ~ ("." ~ identifier)* }
-prim_stmt_body     =  { string ~ prim_metadata? ~ "{" ~ prim_content* ~ "}" }
-prim_content       =  { variant_set_stmt | prim_stmt | prim_property }
-prim_metadata      =  { "(" ~ (layer_ref | metadata_item | string)* ~ ")" }
+prim_stmt          =  { ("def" | "class" | "over") ~ identifier? ~ string ~ prim_metadata? ~ "{" ~ prim_content* ~ "}" }
+prim_content       = _{ prim_property | prim_stmt | variant_set_stmt }
+prim_metadata      = _{ "(" ~ (layer_ref | metadata_item | string)* ~ ")" }
 layer_ref          =  { property_prefix? ~ metadata_key ~ "=" ~ asset_reference ~ scene_path? }
 prim_stmt_for_test = _{ SOI ~ prim_stmt ~ EOI }
 

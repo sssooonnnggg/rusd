@@ -55,13 +55,6 @@ mod tests {
     }
 
     #[test]
-    fn test_comment_and_whitespace() {
-        print_and_test(Rule::float_for_test, r#"  // something
-            // something 2
-        1.234"#);
-    }
-
-    #[test]
     fn test_identifier() {
         print_and_test(Rule::identifier, "abc");
         print_and_test(Rule::identifier, "abc0123");
